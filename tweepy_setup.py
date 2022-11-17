@@ -14,16 +14,23 @@ api = tweepy.API(auth)
 # for tweet in api.home_timeline():
 #     print(tweet.text)
 
-person = client.get_user(username="madhursaxena_").data.id
-
 def get_user_id(name):
-    return client.get_user(username=name).data.id
+    id = ""
+    err = ""
+    print(name)
+    try:
+        id = client.get_user(username=name).data.id
+        print(id)
+    except Exception as e:
+        print("id not found")
+        err=e
+    return id, err
 
 def recent_tweets(id):
     print(type(client.get_users_tweets(id).data))
     for tweet in client.get_users_tweets(id).data:
         print(tweet.text)
-# for tweet in client.get_users_tweets(person).data:
+# for tweet in client.get_users_tweets(person).data:+
 #     print(tweet.text)
 def last_tweet(id):
     data=""
@@ -34,14 +41,19 @@ def last_tweet(id):
     return data
 
 def likes_count(id):
+    count = 0
+    tweet_count = 0
     for tweet in client.get_users_tweets(id).data:
         try:
-            for d in client.get_liking_users(tweet.id).data:
-                print(d.name)
-        except:
-            print(tweet.id,"no likes")
-        # print(tw)
+            li =  client.get_liking_users(tweet.id).data
+            print(tweet)
+            for d in li:
+                print(id, d, end=" ")
+                count+=1
+        except Exception as e:
+            print("err", e)
         print()
-        
-
-
+        tweet_count+=1
+        if tweet_count==10:
+            break
+    return count
