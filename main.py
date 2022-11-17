@@ -4,6 +4,13 @@ from tweepy_setup import *
 import tweepy
 
 
+client = pymongo.MongoClient("mongodb+srv://Abhay:Abhay123@cluster0.bba05gv.mongodb.net/?retryWrites=true&w=majority")
+db = client.users
+
+print(db)
+# // to insert a message
+# db.users.insert_one({});
+
 bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
 
 @bot.event
