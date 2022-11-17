@@ -2,14 +2,11 @@ import discord
 from discord.ext import commands
 from tweepy_setup import *
 import tweepy
-
+import pymongo
+from datetime import datetime, timedelta
 
 client = pymongo.MongoClient("mongodb+srv://Abhay:Abhay123@cluster0.bba05gv.mongodb.net/?retryWrites=true&w=majority")
 db = client.users
-
-print(db)
-# // to insert a message
-# db.users.insert_one({});
 
 bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
 
@@ -18,20 +15,43 @@ async def on_ready():
     print("Bot Is Online")
 
 @bot.command()
-async def ping(ctx, arg1):
-    id = get_user_id(arg1)
-    t = last_tweet(id)
-    likes_count(id)
-    # print(t)
-    await ctx.reply(f"Pong! {round(bot.latency * 1000)}ms")
+async def register(ctx, arg1):
+    res, err = get_user_id(arg1)
+    if err!="" :
+        await ctx.reply(f"Username is invalid! {round(bot.latency * 1000)}ms")
+    else:
+        db.user_instance.insert_one({
+            "username" : arg1,
+            "serverId": ctx.guild.id,
+            "end_time": datetime.today() + timedelta(seconds=15),
+        })
+        # db.users.insert_one({
+        #     "username" : arg1,
+        #     "twitterId": res,
+        #     "serverId": ctx.guild.id
+        # })
+        # # await ctx.reply(f"Pong! {round(bot.latency * 1000)}ms")
+        # await ctx.reply(f"User Registered {round(bot.latency * 1000)}ms")
 
 @bot.command()
-async def twit(ctx):
-    r = requests.get("https://api.twitter.com/2/users/:id/tweets")
-    res = r.json()
-    em = discord.Embed()
-    em.set_image(url=res['message'])
-    await ctx.send(embed=em)
+async def leaderboard(ctx):
+    def cmp(ele):
+        return ele['likes']
+    users = db.users.find()
+    scores = []
+    for user in users:
+        print(user["username"])
+        scores.append({"username": user["username"], "likes": likes_count(user["twitterId"])})
+    scores.sort(key=cmp, reverse=True)
+    print(scores)
+    await ctx.reply(f"Leaderboard")
+# @bot.command()
+# async def twit(ctx):
+#     r = requests.get("https://api.twitter.com/2/users/:id/tweets")
+#     res = r.json()
+#     em = discord.Embed()
+#     em.set_image(url=res['message'])
+#     await ctx.send(embed=em)
 
 
 
