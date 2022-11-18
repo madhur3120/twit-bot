@@ -17,14 +17,10 @@ api = tweepy.API(auth)
 def get_user_id(name):
     id = ""
     err = ""
-    print(name)
     try:
-        print(name)
-        id = client.get_user(username=name).data.id
-        print(id)   
+        id = client.get_user(username=name).data.id  
     except Exception as e:
         print("id not found")
-        print(e)
         err=e
     return id, err
 
@@ -38,7 +34,6 @@ def last_tweet(id):
     data=""
     for tweet in client.get_users_tweets(id).data:
         data=tweet.text
-        print(tweet.id)
         break
     return data
 

@@ -9,7 +9,7 @@ client = pymongo.MongoClient(
     "mongodb+srv://Abhay:Abhay123@cluster0.bba05gv.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())
 db = client.users
 
-# db.user_instances.create_index("inserted", expireAfterSeconds = 120)
+db.user_instances.create_index("inserted", expireAfterSeconds = 120)
 
 bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
 
@@ -20,21 +20,29 @@ async def on_ready():
 @bot.command()
 async def register(ctx, arg1):
     res, err = get_user_id(arg1)
+    print("res ",res)
+    print("error ",err)
     if err != "":
         await ctx.reply(f"Username is invalid! {round(bot.latency * 1000)}ms")
     else:
-        db.user_instances.insert_one({
-            "username": arg1,
-            "twitterId": res,
-            "serverId": ctx.guild.id,
-            "inserted": datetime.utcnow()})
-        await ctx.reply(f"tweet something!")
+        try:
+            user_instance = db.user_instances.find_one({"serverId" : ctx.guild.id})
+            print("user_instance ",user_instance)
+            if user_instance==None:
+                db.user_instances.insert_one({
+                    "username": arg1,
+                    "twitterId": res,
+                    "serverId": ctx.guild.id,
+                    "inserted": datetime.utcnow()})
+                await ctx.reply(f"tweet something!")
+            else:
+                await ctx.reply(f"You have already registered!")
+        except Exception as e:
+            print("Exception ",e)
 
 @bot.command()
 async def verify(ctx, arg1):
     serverId = ctx.guild.id
-    print(arg1)
-    print(serverId)
     try:
         user_instance = db.user_instances.find_one({"serverId" : serverId})
         lastTweetContent = last_tweet(user_instance["twitterId"])
