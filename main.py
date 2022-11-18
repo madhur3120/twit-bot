@@ -116,8 +116,11 @@ async def leaderboard(ctx, arg1=1):
     if len(scores) < int(arg1):
         await ctx.reply("Entered number is more than the users present in database. 😳")
         arg1 = len(scores)
-
-    em = discord.Embed(title=f"Top {arg1} Most Liked People 📈",
+    if arg1==1:
+        em = discord.Embed(title=f"Top Liked User 📈",
+                       description="This is based on the number of likes on twitter", color=discord.Color(0xfa43ee))
+    else:
+        em = discord.Embed(title=f"Top {arg1} Most Liked People 📈",
                        description="This is based on the number of likes on twitter", color=discord.Color(0xfa43ee))
     index = 1
     for score in scores:
