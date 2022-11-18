@@ -277,10 +277,10 @@ async def withdraw(ctx, amount = None):
         return
     
     err = await update_bank(ctx.author.id, int(amount))
-    if err:
-        await ctx.send(err)
+    if err==None:
+        await ctx.send(f"You withdrew {amount} coins")
     else:
-        await("You withdrew {amount} coins")
+        await ctx.send(err)
         
 @bot.command(aliases=['8ball','test'])
 async def eightball(ctx, *, question):
