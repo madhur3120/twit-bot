@@ -26,7 +26,7 @@ async def on_command_error( ctx,error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send("No such command")
     else:
-        await ctx.send("no")
+        await ctx.send(error)
 
 
 @bot.command()
@@ -275,12 +275,12 @@ async def withdraw(ctx, amount = None):
     if amount == None:
         await ctx.send("Please enter the amount!")
         return
-    
-    err = await update_bank(ctx.author.id, int(amount))
-    if err==None:
-        await ctx.send(f"You withdrew {amount} coins")
+    if amount.isnumeric():
+        err = await update_bank(ctx.author.id, int(amount))
+        if err==None:
+         await ctx.send(f"You withdrew {amount} coins")
     else:
-        await ctx.send(err)
+        await ctx.send("Enter a Numeric Value")
         
 @bot.command(aliases=['8ball','test'])
 async def eightball(ctx, *, question):
