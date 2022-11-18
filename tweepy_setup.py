@@ -11,9 +11,6 @@ client = tweepy.Client(bearer_token, api_key, api_secret, access_token, access_t
 auth = tweepy.OAuth1UserHandler(api_key, api_secret, access_token, access_token_secret)
 api = tweepy.API(auth)
 
-# for tweet in api.home_timeline():
-#     print(tweet.text)
-
 def get_user_id(name):
     id = ""
     err = ""
@@ -28,8 +25,7 @@ def recent_tweets(id):
     print(type(client.get_users_tweets(id).data))
     for tweet in client.get_users_tweets(id).data:
         print(tweet.text)
-# for tweet in client.get_users_tweets(person).data:+
-#     print(tweet.text)
+
 def last_tweet(id):
     data=""
     for tweet in client.get_users_tweets(id).data:
