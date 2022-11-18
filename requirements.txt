@@ -1,0 +1,5 @@
+discord.py==2.1.0
+tweepy==4.9.0
+pymongo==4.3.3
+dnspython==2.2.1
+certifi==2021.5.30

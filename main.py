@@ -12,13 +12,30 @@ db = client.users
 db.register_instances.create_index("inserted", expireAfterSeconds=120)
 db.follow_instances.create_index("inserted", expireAfterSeconds=120)
 
-bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
+bot = commands.Bot(command_prefix="!", intents=discord.Intents.all(), help_command=None)
 
 
 @bot.event
 async def on_ready():
     print("Bot Is Online")
-
+# register
+# profile
+# commands_list
+# verify
+# leaderboard
+# help
+# follow
+@bot.command()
+async def help(ctx):
+    em = discord.Embed(title=f"Help Commands 🤖",
+                       description="List of all commands 🛠️", color=discord.Color(0xfa43ee))
+    em.add_field(name="!commands_list", value = "🧰 Shows list of all commands ", inline=False)
+    em.add_field(name="!profile", value = "⚙️ Shows profile of user ", inline=False)
+    em.add_field(name="!register", value = "🔧 Register your twitter handle ", inline=False)
+    em.add_field(name="!verify", value="🗜️ Verify user for successful registration ", inline=False)
+    em.add_field(name="!leaderboard 'number'", value="💻 Displays Top Users ", inline=False)
+    em.add_field(name="!follow 'discord user'", value="💰 To follow other user ", inline=False)
+    await ctx.send(embed=em)
 
 @bot.command()
 async def register(ctx, arg1):
