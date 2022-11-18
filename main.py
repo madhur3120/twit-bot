@@ -1,4 +1,5 @@
 import discord
+import random
 from discord.ext import commands
 from tweepy_setup import *
 import pymongo
@@ -88,7 +89,7 @@ async def verify(ctx, arg1):
 
 
 @bot.command()
-async def leaderboard(ctx, arg1):
+async def leaderboard(ctx, arg1=1):
     def cmp(ele):
         return ele['likes']
     users = db.users.find()
@@ -192,15 +193,13 @@ async def profile(ctx, member: discord.Member = None):
     likes = likes_count(user_data["twitterId"])
     followers, err = get_followers(user_data["twitterId"])
     following, err = get_following_count(user_data["twitterId"])
-
     embed = discord.Embed(title="Username", description=user_data["username"], colour=discord.Colour.random())
     embed.set_author(name=f"{name}")
     embed.set_thumbnail(url=f"{pfp}")
     embed.add_field(name="Likes 👍 ", value = likes)
-    embed.add_field(name="Followers 👥 ", value = followers, inline=True)
+    embed.add_field(name="Followers 👥 ", value = len(followers), inline=True)
     embed.add_field(name="Following ", value = following, inline=False)
     embed.add_field(name="Coins 🪙 ", value = user_data["coins"], inline = True)
-
     await ctx.send(embed=embed)
 
 @bot.command(aliases=['8ball','test'])
