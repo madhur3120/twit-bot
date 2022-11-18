@@ -49,16 +49,16 @@ def likes_count(id):
             break
     return count
 
-def get_followers_count(twitterId):
-    followers_count = 0
+def get_followers(twitterId):
+    followers = 0
     err= "",
     try:
         data = client.get_users_followers(twitterId).data
-        followers_count = len(data)
+        followers = data
     except Exception as e:
         print("err", e)
         err=e
-    return followers_count, err
+    return followers, err
 
 def get_following_count(twitterId):
     followers_count = 0
