@@ -4,6 +4,7 @@ from tweepy_setup import *
 import pymongo
 from datetime import datetime
 import certifi
+import random
 
 client = pymongo.MongoClient(
     "mongodb+srv://Abhay:Abhay123@cluster0.bba05gv.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())
