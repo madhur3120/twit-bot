@@ -25,12 +25,12 @@ async def help(ctx):
     em = discord.Embed(title=f"Help Commands 🤖",
                        description="List of all commands 🛠️", color=discord.Color(0xfa43ee))
     em.add_field(name="!help", value = "🧰 Shows list of all commands ", inline=False)
-    em.add_field(name="!profile", value = "⚙️ Shows profile of user ", inline=False)
-    em.add_field(name="!register", value = "🔧 Register your twitter handle ", inline=False)
-    em.add_field(name="!verify", value="🗜️ Verify user for successful registration ", inline=False)
-    em.add_field(name="!leaderboard 'number'", value="💻 Displays Top Users ", inline=False)
-    em.add_field(name="!follow 'discord user'", value="💰 Requesting the other user to follow ", inline=False)
-    em.add_field(name="!followed 'discord user'", value="💰 have followed the user ", inline=False)
+    em.add_field(name="!profile", value = "⚙️ Shows profile of a user ", inline=False)
+    em.add_field(name="!register 'twitter username'", value = "🔧 Request for registeration of your twitter handle ", inline=False)
+    em.add_field(name="!verify 'last tweet content'", value="🗜️ Verify twitter account for successful registration ", inline=False)
+    em.add_field(name="!leaderboard 'number'", value="💻 Displays Top 'number' users", inline=False)
+    em.add_field(name="!follow 'mention discord handle'", value="💰 Request mentioned user to follow you", inline=False)
+    em.add_field(name="!followed 'mention discord handle'", value="💰 Verify that you have followed the mentioned user", inline=False)
     em.add_field(name="!eightball", value="🙋 Asking Yes/No Questions to the bot", inline=False)
     await ctx.send(embed=em)
 
