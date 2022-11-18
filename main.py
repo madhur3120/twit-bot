@@ -43,7 +43,7 @@ async def register(ctx, arg1):
     print(ctx.message.author.id)
     discordId=ctx.message.author.id
     if err != "":
-        await ctx.reply(f"Username is invalid!")
+        await ctx.reply(f"Given username is invalid! 😕")
     else:
         try:
             register_instance = db.register_instances.find_one({"serverId" : ctx.guild.id})
@@ -55,7 +55,7 @@ async def register(ctx, arg1):
                     "twitterId": res,
                     "serverId": ctx.guild.id,
                     "inserted": datetime.utcnow()})
-                await ctx.reply(f"tweet something!")
+                await ctx.reply(f"Tweet Something!")
             else:
                 await ctx.reply(f"You have already registered!")
         except Exception as e:
@@ -71,7 +71,7 @@ async def verify(ctx, arg1):
         lastTweetContent = last_tweet(register_instance["twitterId"])
         print(lastTweetContent)
         if lastTweetContent != arg1:
-            await ctx.reply(f"Content didn't match with your last tweet!")
+            await ctx.reply(f"Your input didn't match with your last tweet! 🤨")
         else:
             try:
                 db.users.insert_one({
@@ -103,15 +103,15 @@ async def leaderboard(ctx, arg1):
     scores.sort(key=cmp, reverse=True)
     print(scores)
     if len(scores) < int(arg1):
-        await ctx.reply("Entered number is more than the users present in database.")
+        await ctx.reply("Entered number is more than the users present in database. 😳")
         arg1 = len(scores)
 
-    em = discord.Embed(title=f"Top {arg1} Richest People",
+    em = discord.Embed(title=f"Top {arg1} Most Liked People 📈",
                        description="This is based on the number of likes on twitter", color=discord.Color(0xfa43ee))
     index = 1
     for score in scores:
         em.add_field(name=f"{score['username']}",
-                     value=f"likes: {score['likes']}", inline=False)
+                     value=f"Likes 👍 : {score['likes']}", inline=False)
         if index == int(arg1):
             break
         else:
@@ -196,15 +196,20 @@ async def profile(ctx, member: discord.Member = None):
     followers, err = get_followers(user_data["twitterId"])
     following, err = get_following_count(user_data["twitterId"])
 
-    embed = discord.Embed(title="Twitter Username", description=user_data["username"], colour=discord.Colour.random())
+    embed = discord.Embed(title="Username", description=user_data["username"], colour=discord.Colour.random())
     embed.set_author(name=f"{name}")
     embed.set_thumbnail(url=f"{pfp}")
-    embed.add_field(name="Likes", value = likes)
-    embed.add_field(name="Followers", value = len(followers), inline=True)
-    embed.add_field(name="Following", value = following, inline=False)
-    embed.add_field(name="Coins", value = user_data["coins"], inline = True)
+    embed.add_field(name="Likes 👍 ", value = likes)
+    embed.add_field(name="Followers 👥 ", value = followers, inline=True)
+    embed.add_field(name="Following ", value = following, inline=False)
+    embed.add_field(name="Coins 🪙 ", value = user_data["coins"], inline = True)
 
     await ctx.send(embed=embed)
+
+@bot.command(aliases=['8ball','test'])
+async def eightball(ctx, *, question):
+    responses = ["As I see it, yes.", "Ask again later","Better not tell you now.", "Cannot predict now.", "Concentrate and ask again.", "Don't count on it.", "Is is certain", "It is decidedly no.","Most likely","My reply is NO.","My sources say NO.","Outlook not so good","Outlook good!","Signs point to yes!","Without a doubt!!"]
+    await ctx.send(f"**Question:** {question}\n**Answers:** {random.choice(responses)}")
 
 # @bot.event
 # async def on_message(message):
