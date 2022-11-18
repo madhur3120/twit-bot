@@ -279,18 +279,38 @@ async def balance(ctx):
         await ctx.send(f"Some error occured!")
 
 
-async def update_bank(user_discordId, change=0, withdraw=1):
+async def update_bank_withdraw(user_discordId, change=0):
     err = None
     try:
         user_data = db.users.find_one({"discordId": user_discordId})
         if user_data["bank"] < change:
-            err = "You don't have that much money!"
+            err = "You don't have that much money in bank!"
             return err
         if change < 0:
             err = "Amount should be positive!"
+            return err
         data = db.users.update_one({"discordId": user_discordId}, {"$inc": {
-            "bank": withdraw*change,
-            "wallet": -1*withdraw*change
+            "bank": -1*change,
+            "wallet": change
+        }})
+
+    except Exception as e:
+        err = "Some error occured!"
+    return err
+
+async def update_bank_deposit(user_discordId, change=0):
+    err = None
+    try:
+        user_data = db.users.find_one({"discordId": user_discordId})
+        if user_data["wallet"] < change:
+            err="You don't have enough money in your wallet!"
+            return err
+        if change < 0:
+            err="Amount should be positive!"
+            return err
+        data = db.users.update_one({"discordId": user_discordId}, {"$inc": {
+            "bank": change,
+            "wallet": -1*change
         }})
 
     except Exception as e:
@@ -304,9 +324,11 @@ async def withdraw(ctx, amount=None):
         await ctx.send("Please enter the amount!")
         return
     if amount.isnumeric():
-        err = await update_bank(ctx.author.id, int(amount), -1)
+        err = await update_bank_withdraw(ctx.author.id, int(amount))
         if err == None:
             await ctx.send(f"You withdrew {amount} coins")
+        else:
+            await ctx.send(err)
     else:
         await ctx.send("Enter a Numeric Value")
 
@@ -317,9 +339,12 @@ async def deposit(ctx, amount=None):
         await ctx.send("Please enter the amount!")
         return
     if amount.isnumeric():
-        err = await update_bank(ctx.author.id, int(amount))
+        amount1=int(amount)
+        err = await update_bank_deposit(ctx.author.id, amount1)
         if err==None:
-            await ctx.send(f"You deposited {amount} coins")
+            await ctx.send(f"You deposited {amount1} coins")
+        else:
+            await ctx.send(err)
     else:
         await ctx.send("Enter a Numeric Value")
 
@@ -419,7 +444,7 @@ async def shop(ctx):
     await ctx.send(embed=em)
 
 
-@bot.commad()
+@bot.command()
 async def buy(ctx, itemName, amount=1):
     item_name = itemName.lower()
     name_ = None
