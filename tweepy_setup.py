@@ -19,10 +19,12 @@ def get_user_id(name):
     err = ""
     print(name)
     try:
+        print(name)
         id = client.get_user(username=name).data.id
-        print(id)
+        print(id)   
     except Exception as e:
         print("id not found")
+        print(e)
         err=e
     return id, err
 
