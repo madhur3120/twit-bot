@@ -317,7 +317,54 @@ async def send(ctx, member:discord.Member, amount = None):
     }}) 
 
     await ctx.send(f"You sent {amount} coins to {member.mention}")
-        
+
+@bot.command()
+async def slots(ctx, amount = None):
+    if amount == None:
+        await ctx.send("Please enter the amount!")
+        return
+    
+    if amount < 0:
+        await ctx.send("Amount should be positive!")
+        return
+
+    user_data = db.users.find_one({"discordId": ctx.author.id})
+    if user_data.wallet < amount:
+        await ctx.send("Insufficient balance!")
+        return
+    
+    final = []
+    for i in range(3):
+        a = random.choice(["🙂", "😁", "😉"])
+    
+    final.append(a)
+
+    await ctx.send(str(final))
+
+    if final[0] == final[1] or final[2] == final[2] or final[1] == final[2]:
+        await db.users.update_one({"discordId": ctx.author.id}, {"$inc" : {
+            "wallet": 2*amount,
+        }}) 
+    else:
+        await db.users.update_one({"discordId":ctx.author.id}, {"$inc" : {
+            "wallet": -1*amount,
+        }}) 
+
+@bot.command()  
+async def rob(ctx, member: discord.Member):  
+    user_data = db.users.find_one({"discordId": member.id})
+    if user_data.wallet < 50:
+        await ctx.send("It's not worth it!")
+        return
+    earnings = random.randrange(0, user_data.wallet)
+    await db.users.update_one({"discordId": ctx.author.id}, {"$inc" : {
+        "wallet": earnings,
+    }}) 
+    await db.users.update_one({"discordId": member.id}, {"$inc" : {
+        "wallet": -1*earnings,
+    }}) 
+
+    
 @bot.command(aliases=['8ball','test'])
 async def eightball(ctx, *, question):
     responses = ["As I see it, yes.", "Ask again later","Better not tell you now.", "Cannot predict now.", "Concentrate and ask again.", "Don't count on it.", "Is is certain", "It is decidedly no.","Most likely","My reply is NO.","My sources say NO.","Outlook not so good","Outlook good!","Signs point to yes!","Without a doubt!!"]
