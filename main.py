@@ -250,8 +250,38 @@ async def balance(ctx):
 
     except Exception as e:
         await ctx.send(f"Some error occured!")
+    
+async def update_bank(user_discordId, change = 0):
+    err = None
+    try:
+        user_data = db.users.find_one({"discordId": user_discordId})
+        if user_data["bank"] < change:
+            err = "You don't have that much money!"
+            return err
+        if change < 0:
+            err = "Amount should be positive!"
+        data = db.users.update_one({"discordId": user_discordId}, {"$inc" : {
+            "bank": -1*change,
+            "wallet": change
+        }})       
+
+    except Exception as e:
+        err = "Some error occured!"
+    return err
 
 
+@bot.command()
+async def withdraw(ctx, amount = None):
+    if amount == None:
+        await ctx.send("Please enter the amount!")
+        return
+    
+    err = await update_bank(ctx.author.id, int(amount))
+    if err:
+        await ctx.send(err)
+    else:
+        await("You withdrew {amount} coins")
+        
 @bot.command(aliases=['8ball','test'])
 async def eightball(ctx, *, question):
     responses = ["As I see it, yes.", "Ask again later","Better not tell you now.", "Cannot predict now.", "Concentrate and ask again.", "Don't count on it.", "Is is certain", "It is decidedly no.","Most likely","My reply is NO.","My sources say NO.","Outlook not so good","Outlook good!","Signs point to yes!","Without a doubt!!"]
