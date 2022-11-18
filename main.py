@@ -241,10 +241,10 @@ async def profile(ctx, member: discord.Member = None):
         title="Username", description=user_data["username"], colour=discord.Colour.random())
     embed.set_author(name=f"{name}")
     embed.set_thumbnail(url=f"{pfp}")
-    embed.add_field(name="Likes 👍 ", value=likes)
-    embed.add_field(name="Followers 👥 ", value=len(followers), inline=True)
-    embed.add_field(name="Following ", value=following, inline=False)
-    embed.add_field(name="Coins 🪙 ", value=user_data["coins"], inline=True)
+    embed.add_field(name="Likes 👍 ", value = likes)
+    embed.add_field(name="Followers 👥 ", value = len(followers), inline=True)
+    embed.add_field(name="Following ", value = following, inline=False)
+    embed.add_field(name="Wallet 🪙 ", value = user_data["wallet"], inline = True)
     await ctx.send(embed=embed)
 
 
