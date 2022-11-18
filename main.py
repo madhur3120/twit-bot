@@ -79,7 +79,8 @@ async def verify(ctx, arg1):
                     "discordId": discordId,
                     "twitterId": register_instance["twitterId"],
                     "serverId": ctx.guild.id,
-                    "coins": 5000
+                    "coins": 5000,
+                    "inserted": datetime.utcnow()
                 })
                 await ctx.reply(f"User registered!")
             except Exception as e:
@@ -119,39 +120,65 @@ async def leaderboard(ctx, arg1):
 
 
 @bot.command()
-async def follow(ctx, arg):
+async def follow(ctx, member: discord.Member):
+    requestedDiscordId=member.id
+    requestingDiscordId=ctx.message.author.id
+    print("requestedDiscordId ", requestedDiscordId);
+    print("requestingDiscordId ", requestingDiscordId);
     try:
-        userRequesting = db.users.find_one({"serverId": ctx.guild.id})
+        userRequesting = db.users.find_one({"discordId": requestingDiscordId})
+        if userRequesting==None:
+            raise Exception("user not found")
         try:
-            userRequested = db.users.find_one({"username": arg})
-            channel = ctx.guild.system_channel
-            db.follow_instances.insert_one({
-                "requestingUserTwitterId": userRequesting["twitterId"],
-                "requestedUserTwitterId": userRequested["twitterId"],
-            })
-            await channel.send(f"{arg.mention} Follow {userRequesting['username']} to earn 50 coins.")
-        except:
+            userRequested = db.users.find_one({"discordId": requestedDiscordId})
+            followers, err = get_followers(userRequesting["twitterId"])
+            check = any(follower for follower in followers if follower["username"] == userRequested["username"])
+            if check:
+                await ctx.reply("User is already following you")
+            else:
+                channel = ctx.guild.system_channel
+                db.follow_instances.insert_one({
+                    "requestingUserDiscordId": requestingDiscordId,
+                    "requestedUserDiscordId": requestedDiscordId,
+                    "requestingUserTwitterId": userRequesting["twitterId"],
+                    "requestedUserTwitterId": userRequested["twitterId"],
+                })
+            await channel.send(f"{member.mention} Follow {userRequesting['username']} to earn 50 coins in 2 minutes.")
+        except Exception as e:
+            print(e)
             await ctx.reply("User you are requesting is not registered")
     except:
-        await ctx.reply("You are not registered")
+        await ctx.reply("You are not registered!")
 
 @bot.command()
-async def followed(ctx, arg):
+async def followed(ctx, member: discord.Member):
+    requestingDiscordId=member.id
+    requestedDiscordId=ctx.message.author.id
     try:
-        userFollowing = db.users.find_one({"serverId": ctx.guild.id})
+        request_instance = db.follow_instances.find_one({"$and":[
+            {"requestingUserDiscordId": requestingDiscordId},
+            {"requestedUserDiscordId": requestedDiscordId}
+        ]})
+        print(request_instance)
         try:
-            userFollowed = db.users.find_one({"username": arg})
-            request = db.request_instances.find_one({
-                "$and" : [
-                    {"requestingUserTwitterId": userFollowed["twitterId"]},
-                    {"requestedUserTwitterId": userFollowed["twitterId"]}
-                ]
-            })
-        except:
+            followers, err = get_followers(request_instance["requestingUserTwitterId"])
+            check = any(follower for follower in followers if follower["id"] == request_instance["requestedUserTwitterId"])
+            if check:
+                data = db.users.update_one({"discordId": requestedDiscordId}, {"$inc" : {
+                    "coins": -50
+                }})
+                data = db.users.update_one({"discordId": requestingDiscordId}, {"$inc" : {
+                    "coins": 50
+                }})
+                await ctx.reply("Successfully verified! You have gained 50 coins.")
+            else:
+                await ctx.reply("You have not followed the user!")
+        except Exception as e:
+            print(e)
             await ctx.reply("User you are following is not registered")
-    except:
-        await ctx.reply("You are not registered")
-
+    except Exception as e:
+        print("e ", e)
+        await ctx.reply(f"No request was made by {member.mention}")
 
 @bot.command()
 async def profile(ctx, member: discord.Member = None):
@@ -166,14 +193,14 @@ async def profile(ctx, member: discord.Member = None):
     name = member.display_name
     pfp = member.display_avatar
     likes = likes_count(user_data["twitterId"])
-    followers, err = get_followers_count(user_data["twitterId"])
+    followers, err = get_followers(user_data["twitterId"])
     following, err = get_following_count(user_data["twitterId"])
 
     embed = discord.Embed(title="Twitter Username", description=user_data["username"], colour=discord.Colour.random())
     embed.set_author(name=f"{name}")
     embed.set_thumbnail(url=f"{pfp}")
     embed.add_field(name="Likes", value = likes)
-    embed.add_field(name="Followers", value = followers, inline=True)
+    embed.add_field(name="Followers", value = len(followers), inline=True)
     embed.add_field(name="Following", value = following, inline=False)
     embed.add_field(name="Coins", value = user_data["coins"], inline = True)
 
