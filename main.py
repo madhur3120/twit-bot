@@ -45,7 +45,7 @@ async def register(ctx, arg1):
         await ctx.reply(f"Given username is invalid! 😕")
     else:
         try:
-            register_instance = db.register_instances.find_one({"serverId" : ctx.guild.id})
+            register_instance = db.register_instances.find_one({"discordId" : discordId})
             lastTweetContent = last_tweet(res)
             if register_instance==None:
                 db.register_instances.insert_one({
