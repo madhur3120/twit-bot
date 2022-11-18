@@ -21,6 +21,14 @@ bot = commands.Bot(command_prefix="!", intents=discord.Intents.all(), help_comma
 async def on_ready():
     print("Bot Is Online")
 
+@bot.event
+async def on_command_error( ctx,error):
+    if isinstance(error, commands.CommandNotFound):
+        await ctx.send("No such command")
+    else:
+        await ctx.send("no")
+
+
 @bot.command()
 async def help(ctx):
     em = discord.Embed(title=f"Help Commands 🤖",
