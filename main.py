@@ -226,7 +226,7 @@ async def profile(ctx, member: discord.Member = None):
 @bot.command()
 async def beg(ctx):
     discordId = ctx.message.author.id
-    earnings = random.randrane(101);
+    earnings = random.randrange(101);
     try:
         db.users.update_one({"discordId": discordId}, {"$inc" : {
             "wallet": earnings
@@ -240,12 +240,13 @@ async def balance(ctx):
     discordId = ctx.message.author.id
     try:
         user_data = db.users.find_one({"discordId": discordId})
-        wallet_amount = user_data.wallet
-        bank_amount = user_data.bank
-        em = discord.Embed(title = f"{ctx.author.name}'s balance", color =  discord.Colour.red)
-        em.add_field(name = "Wallet balance", value = wallet_amount)
-        em.add_field(name = "Bank balance", value = bank_amount)
-        await ctx.send(embed = em)
+        wallet_amount = user_data["wallet"]
+        bank_amount = user_data["bank"]
+        embed = discord.Embed(title=f"{ctx.author.name}'s balance 🪙", color =  discord.Colour.green())
+        
+        embed.add_field(name = "Wallet balance", value = wallet_amount)
+        embed.add_field(name = "Bank balance", value = bank_amount)
+        await ctx.send(embed = embed)
 
     except Exception as e:
         await ctx.send(f"Some error occured!")
