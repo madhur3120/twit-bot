@@ -18,23 +18,19 @@ bot = commands.Bot(command_prefix="!", intents=discord.Intents.all(), help_comma
 @bot.event
 async def on_ready():
     print("Bot Is Online")
-# register
-# profile
-# commands_list
-# verify
-# leaderboard
-# help
-# follow
+
 @bot.command()
 async def help(ctx):
     em = discord.Embed(title=f"Help Commands 🤖",
                        description="List of all commands 🛠️", color=discord.Color(0xfa43ee))
-    em.add_field(name="!commands_list", value = "🧰 Shows list of all commands ", inline=False)
+    em.add_field(name="!help", value = "🧰 Shows list of all commands ", inline=False)
     em.add_field(name="!profile", value = "⚙️ Shows profile of user ", inline=False)
     em.add_field(name="!register", value = "🔧 Register your twitter handle ", inline=False)
     em.add_field(name="!verify", value="🗜️ Verify user for successful registration ", inline=False)
     em.add_field(name="!leaderboard 'number'", value="💻 Displays Top Users ", inline=False)
-    em.add_field(name="!follow 'discord user'", value="💰 To follow other user ", inline=False)
+    em.add_field(name="!follow 'discord user'", value="💰 Requesting the other user to follow ", inline=False)
+    em.add_field(name="!followed 'discord user'", value="💰 have followed the user ", inline=False)
+    em.add_field(name="!eightball", value="🙋 Asking Yes/No Questions to the bot", inline=False)
     await ctx.send(embed=em)
 
 @bot.command()
