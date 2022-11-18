@@ -39,9 +39,7 @@ def likes_count(id):
     for tweet in client.get_users_tweets(id).data:
         try:
             li =  client.get_liking_users(tweet.id).data
-            print(tweet)
             for d in li:
-                print(id, d, end=" ")
                 count+=1
         except Exception as e:
             print("err", e)
@@ -50,3 +48,25 @@ def likes_count(id):
         if tweet_count==10:
             break
     return count
+
+def get_followers_count(twitterId):
+    followers_count = 0
+    err= "",
+    try:
+        data = client.get_users_followers(twitterId).data
+        followers_count = len(data)
+    except Exception as e:
+        print("err", e)
+        err=e
+    return followers_count, err
+
+def get_following_count(twitterId):
+    followers_count = 0
+    err= "",
+    try:
+        data = client.get_users_following(twitterId).data
+        following_count = len(data)
+    except Exception as e:
+        print("err", e)
+        err=e
+    return following_count, err

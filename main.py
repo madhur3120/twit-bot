@@ -9,12 +9,8 @@ client = pymongo.MongoClient(
     "mongodb+srv://Abhay:Abhay123@cluster0.bba05gv.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())
 db = client.users
 
-<<<<<<< HEAD
-db.user_instances.create_index("inserted", expireAfterSeconds = 120)
-=======
 db.register_instances.create_index("inserted", expireAfterSeconds=120)
 db.follow_instances.create_index("inserted", expireAfterSeconds=120)
->>>>>>> 189cd16e7d4820a2e560b8ea8ec123237507a043
 
 bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
 
@@ -27,18 +23,18 @@ async def on_ready():
 @bot.command()
 async def register(ctx, arg1):
     res, err = get_user_id(arg1)
-    print("res ",res)
-    print("error ",err)
+    print(ctx.message.author.id)
+    discordId=ctx.message.author.id
     if err != "":
-        await ctx.reply(f"Username is invalid! {round(bot.latency * 1000)}ms")
+        await ctx.reply(f"Username is invalid!")
     else:
-<<<<<<< HEAD
         try:
-            user_instance = db.user_instances.find_one({"serverId" : ctx.guild.id})
-            print("user_instance ",user_instance)
-            if user_instance==None:
-                db.user_instances.insert_one({
+            register_instance = db.register_instances.find_one({"serverId" : ctx.guild.id})
+            print("register_instance ",register_instance)
+            if register_instance==None:
+                db.register_instances.insert_one({
                     "username": arg1,
+                    "discordId": discordId,
                     "twitterId": res,
                     "serverId": ctx.guild.id,
                     "inserted": datetime.utcnow()})
@@ -47,31 +43,26 @@ async def register(ctx, arg1):
                 await ctx.reply(f"You have already registered!")
         except Exception as e:
             print("Exception ",e)
-=======
-        db.register_instances.insert_one({
-            "username": arg1,
-            "twitterId": res,
-            "serverId": ctx.guild.id,
-            "inserted": datetime.utcnow()})
-        await ctx.reply(f"tweet something!")
->>>>>>> 189cd16e7d4820a2e560b8ea8ec123237507a043
 
 
 @bot.command()
 async def verify(ctx, arg1):
     serverId = ctx.guild.id
+    discordId=ctx.message.author.id
     try:
-        user_instance = db.register_instances.find_one({"serverId": serverId})
-        lastTweetContent = last_tweet(user_instance["twitterId"])
+        register_instance = db.register_instances.find_one({"serverId": serverId})
+        lastTweetContent = last_tweet(register_instance["twitterId"])
         print(lastTweetContent)
         if lastTweetContent != arg1:
             await ctx.reply(f"Content didn't match with your last tweet!")
         else:
             try:
                 db.users.insert_one({
-                    "username": user_instance["username"],
-                    "twitterId": user_instance["twitterId"],
+                    "username": register_instance["username"],
+                    "discordId": discordId,
+                    "twitterId": register_instance["twitterId"],
                     "serverId": ctx.guild.id,
+                    "coins": 5000
                 })
                 await ctx.reply(f"User registered!")
             except Exception as e:
@@ -145,8 +136,31 @@ async def followed(ctx, arg):
         await ctx.reply("You are not registered")
 
 
+@bot.command()
+async def profile(ctx, member: discord.Member = None):
+    if member == None:
+        member = ctx.author
 
+    user_data = db.users.find_one({"$and":[
+        {"discordId": member.id},
+        {"serverId": ctx.guild.id}
+    ]})
+    print(user_data)
+    name = member.display_name
+    pfp = member.display_avatar
+    likes = likes_count(user_data["twitterId"])
+    followers, err = get_followers_count(user_data["twitterId"])
+    following, err = get_following_count(user_data["twitterId"])
 
+    embed = discord.Embed(title="Twitter Username", description=user_data["username"], colour=discord.Colour.random())
+    embed.set_author(name=f"{name}")
+    embed.set_thumbnail(url=f"{pfp}")
+    embed.add_field(name="Likes", value = likes)
+    embed.add_field(name="Followers", value = followers, inline=True)
+    embed.add_field(name="Following", value = following, inline=False)
+    embed.add_field(name="Coins", value = user_data["coins"], inline = True)
+
+    await ctx.send(embed=embed)
 
 # @bot.event
 # async def on_message(message):
