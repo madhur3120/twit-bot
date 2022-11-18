@@ -91,7 +91,8 @@ async def verify(ctx, arg1):
                     "discordId": discordId,
                     "twitterId": register_instance["twitterId"],
                     "serverId": ctx.guild.id,
-                    "coins": 5000,
+                    "bank": 5000,
+                    "wallet": 0,
                     "inserted": datetime.utcnow()
                 })
                 await ctx.reply(f"User registered!")
@@ -221,6 +222,34 @@ async def profile(ctx, member: discord.Member = None):
     embed.add_field(name="Following ", value = following, inline=False)
     embed.add_field(name="Coins 🪙 ", value = user_data["coins"], inline = True)
     await ctx.send(embed=embed)
+
+@bot.command()
+async def beg(ctx):
+    discordId = ctx.message.author.id
+    earnings = random.randrane(101);
+    try:
+        db.users.update_one({"discordId": discordId}, {"$inc" : {
+            "wallet": earnings
+        }})
+        await ctx.send(f"Someone gave you {earnings} coins.")
+    except Exception as e:
+        await ctx.send(f"Some error occured!")
+
+@bot.command()
+async def balance(ctx):
+    discordId = ctx.message.author.id
+    try:
+        user_data = db.users.find_one({"discordId": discordId})
+        wallet_amount = user_data.wallet
+        bank_amount = user_data.bank
+        em = discord.Embed(title = f"{ctx.author.name}'s balance", color =  discord.Colour.red)
+        em.add_field(name = "Wallet balance", value = wallet_amount)
+        em.add_field(name = "Bank balance", value = bank_amount)
+        await ctx.send(embed = em)
+
+    except Exception as e:
+        await ctx.send(f"Some error occured!")
+
 
 @bot.command(aliases=['8ball','test'])
 async def eightball(ctx, *, question):
