@@ -26,24 +26,33 @@ async def register(ctx, arg1):
         db.user_instances.insert_one({
             "username": arg1,
             "twitterId": res,
+            "serverId": ctx.guild.id,
             "inserted": datetime.utcnow()})
         await ctx.reply(f"tweet something!")
 
 @bot.command()
 async def verify(ctx, arg1):
     serverId = ctx.guild.id
+    print(arg1)
+    print(serverId)
     try:
-        user_instance = await  db.user_instances.find_one({"serverId" : serverId})
-        lastTweetContent = last_tweet(user_instance.twitterId)
+        user_instance = db.user_instances.find_one({"serverId" : serverId})
+        lastTweetContent = last_tweet(user_instance["twitterId"])
+        print(lastTweetContent)
         if lastTweetContent!=arg1:
             await ctx.reply(f"Content didn't match with your last tweet!")
         else:
-            db.users.insert_one({
-                "username": user_instance.username,
-                "twitterId": user_instance.twitterId,
-                "serverId": ctx.guild.id,
-            })
-    except:
+            try: 
+                db.users.insert_one({
+                    "username": user_instance["username"],
+                    "twitterId": user_instance["twitterId"],
+                    "serverId": ctx.guild.id,
+                })
+                await ctx.reply(f"User registered!")
+            except Exception as e:
+                print(e)
+    except Exception as e:
+        print(e)
         await ctx.reply(f"User instance not found in database!")
 
 @bot.command()
@@ -58,12 +67,15 @@ async def leaderboard(ctx, arg1):
             {"username": user["username"], "likes": likes_count(user["twitterId"])})
     scores.sort(key=cmp, reverse=True)
     print(scores)
+    if len(scores) < int(arg1):
+        await ctx.reply("Entered number is more than the users present in database.")
+        arg1 = len(scores)
 
     em = discord.Embed(title = f"Top {arg1} Richest People", description = "This is based on the number of likes on twitter", color = discord.Color(0xfa43ee))
     index = 1
     for score in scores:
-        em.add_field(name = f"{score.username}", likes = f"{score.likes}", inline = False)
-        if index == arg1:
+        em.add_field(name = f"{score['username']}", value = f"likes: {score['likes']}", inline = False)
+        if index == int(arg1):
             break
         else:
             index += 1
