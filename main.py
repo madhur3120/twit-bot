@@ -7,7 +7,7 @@ import asyncio
 from datetime import datetime
 import certifi
 import random
-
+import asyncio
 
 client = pymongo.MongoClient(
     "mongodb+srv://Abhay:Abhay123@cluster0.bba05gv.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())
@@ -16,15 +16,17 @@ db = client.users
 db.register_instances.create_index("inserted", expireAfterSeconds=120)
 db.follow_instances.create_index("inserted", expireAfterSeconds=120)
 
-bot = commands.Bot(command_prefix="!", intents=discord.Intents.all(), help_command=None)
+bot = commands.Bot(command_prefix="!",
+                   intents=discord.Intents.all(), help_command=None)
 
 
 @bot.event
 async def on_ready():
     print("Bot Is Online")
 
+
 @bot.event
-async def on_command_error( ctx,error):
+async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send("No such command")
     else:
@@ -35,29 +37,40 @@ async def on_command_error( ctx,error):
 async def help(ctx):
     em = discord.Embed(title=f"Help Commands 🤖",
                        description="List of all commands 🛠️", color=discord.Color(0xfa43ee))
-    em.add_field(name="!help", value = "🧰 Shows list of all commands ", inline=False)
-    em.add_field(name="!profile", value = "⚙️ Shows profile of a registered user ", inline=False)
-    em.add_field(name="!profile 'mention discord handle", value = "⚙️ Shows profile of a the user mentioned", inline=False)
-    em.add_field(name="!register 'twitter username'", value = "🔧 Request for registeration of your twitter handle ", inline=False)
-    em.add_field(name="!verify 'last tweet content'", value="🗜️ Verify twitter account for successful registration ", inline=False)
-    em.add_field(name="!leaderboard ", value="💻 Displays the top user", inline=False)
-    em.add_field(name="!leaderboard 'number'", value="💻 Displays Top 'number' users", inline=False)
-    em.add_field(name="!follow 'mention discord handle'", value="💰 Request mentioned user to follow you", inline=False)
-    em.add_field(name="!followed 'mention discord handle'", value="💰 Verify that you have followed the mentioned user", inline=False)
-    em.add_field(name="!8ball 'question'", value="🙋 Asking Yes/No Questions to the bot", inline=False)
+    em.add_field(
+        name="!help", value="🧰 Shows list of all commands ", inline=False)
+    em.add_field(name="!profile",
+                 value="⚙️ Shows profile of a registered user ", inline=False)
+    em.add_field(name="!profile 'mention discord handle",
+                 value="⚙️ Shows profile of a the user mentioned", inline=False)
+    em.add_field(name="!register 'twitter username'",
+                 value="🔧 Request for registeration of your twitter handle ", inline=False)
+    em.add_field(name="!verify 'last tweet content'",
+                 value="🗜️ Verify twitter account for successful registration ", inline=False)
+    em.add_field(name="!leaderboard ",
+                 value="💻 Displays the top user", inline=False)
+    em.add_field(name="!leaderboard 'number'",
+                 value="💻 Displays Top 'number' users", inline=False)
+    em.add_field(name="!follow 'mention discord handle'",
+                 value="💰 Request mentioned user to follow you", inline=False)
+    em.add_field(name="!followed 'mention discord handle'",
+                 value="💰 Verify that you have followed the mentioned user", inline=False)
+    em.add_field(name="!8ball 'question'",
+                 value="🙋 Asking Yes/No Questions to the bot", inline=False)
     await ctx.send(embed=em)
+
 
 @bot.command()
 async def register(ctx, arg1):
     res, err = get_user_id(arg1)
-    discordId=ctx.message.author.id
+    discordId = ctx.message.author.id
     if err != "":
         await ctx.reply(f"Given username is invalid! 😕")
     else:
         try:
-            register_instance = db.users.find_one({"discordId" : discordId})
+            register_instance = db.users.find_one({"discordId": discordId})
             lastTweetContent = last_tweet(res)
-            if register_instance==None:
+            if register_instance == None:
                 db.register_instances.insert_one({
                     "username": arg1,
                     "discordId": discordId,
@@ -69,16 +82,18 @@ async def register(ctx, arg1):
             else:
                 await ctx.reply(f"You have already registered! 🙂")
         except Exception as e:
-            print("Exception ",e)
+            print("Exception ", e)
 
 
 @bot.command()
 async def verify(ctx, arg1):
-    discordId=ctx.message.author.id
+    discordId = ctx.message.author.id
     try:
-        register_instance = db.register_instances.find_one({"discordId": discordId})
+        register_instance = db.register_instances.find_one(
+            {"discordId": discordId})
         print("register ", register_instance)
-        print("register_instance['twitterId'] ", register_instance['twitterId'])
+        print("register_instance['twitterId'] ",
+              register_instance['twitterId'])
         lastTweetContent = last_tweet(register_instance["twitterId"])
         print(lastTweetContent)
         if register_instance["lastTweet"] == lastTweetContent:
@@ -119,12 +134,12 @@ async def leaderboard(ctx, arg1=1):
     if len(scores) < int(arg1):
         await ctx.reply("Entered number is more than the users present in database. 😳")
         arg1 = len(scores)
-    if arg1==1:
+    if arg1 == 1:
         em = discord.Embed(title=f"Top Liked User 📈",
-                       description="This is based on the number of likes on twitter", color=discord.Color(0xfa43ee))
+                           description="This is based on the number of likes on twitter", color=discord.Color(0xfa43ee))
     else:
         em = discord.Embed(title=f"Top {arg1} Most Liked People 📈",
-                       description="This is based on the number of likes on twitter", color=discord.Color(0xfa43ee))
+                           description="This is based on the number of likes on twitter", color=discord.Color(0xfa43ee))
     index = 1
     for score in scores:
         em.add_field(name=f"{score['username']}",
@@ -138,16 +153,18 @@ async def leaderboard(ctx, arg1=1):
 
 @bot.command()
 async def follow(ctx, member: discord.Member):
-    requestedDiscordId=member.id
-    requestingDiscordId=ctx.message.author.id
+    requestedDiscordId = member.id
+    requestingDiscordId = ctx.message.author.id
     try:
         userRequesting = db.users.find_one({"discordId": requestingDiscordId})
-        if userRequesting==None:
+        if userRequesting == None:
             raise Exception("user not found")
         try:
-            userRequested = db.users.find_one({"discordId": requestedDiscordId})
+            userRequested = db.users.find_one(
+                {"discordId": requestedDiscordId})
             followers, err = get_followers(userRequesting["twitterId"])
-            check = any(follower for follower in followers if follower["username"] == userRequested["username"])
+            check = any(
+                follower for follower in followers if follower["username"] == userRequested["username"])
             if check:
                 await ctx.reply("User is already following you")
                 return
@@ -167,25 +184,28 @@ async def follow(ctx, member: discord.Member):
     except:
         await ctx.reply("You are not registered!")
 
+
 @bot.command()
 async def followed(ctx, member: discord.Member):
-    requestingDiscordId=member.id
-    requestedDiscordId=ctx.message.author.id
+    requestingDiscordId = member.id
+    requestedDiscordId = ctx.message.author.id
     try:
-        request_instance = db.follow_instances.find_one({"$and":[
+        request_instance = db.follow_instances.find_one({"$and": [
             {"requestingUserDiscordId": requestingDiscordId},
             {"requestedUserDiscordId": requestedDiscordId}
         ]})
-        if request_instance==None:
+        if request_instance == None:
             raise Exception("Request instance not found")
         try:
-            followers, err = get_followers(request_instance["requestingUserTwitterId"])
-            check = any(follower for follower in followers if follower["id"] == request_instance["requestedUserTwitterId"])
+            followers, err = get_followers(
+                request_instance["requestingUserTwitterId"])
+            check = any(
+                follower for follower in followers if follower["id"] == request_instance["requestedUserTwitterId"])
             if check:
-                data = db.users.update_one({"discordId": requestedDiscordId}, {"$inc" : {
+                data = db.users.update_one({"discordId": requestedDiscordId}, {"$inc": {
                     "coins": 50
                 }})
-                data = db.users.update_one({"discordId": requestingDiscordId}, {"$inc" : {
+                data = db.users.update_one({"discordId": requestingDiscordId}, {"$inc": {
                     "coins": -50
                 }})
                 await ctx.reply("Successfully verified! You have gained 50 coins.")
@@ -200,11 +220,12 @@ async def followed(ctx, member: discord.Member):
         print("e ", e)
         await ctx.reply(f"No request was made by {member.mention}")
 
+
 @bot.command()
 async def profile(ctx, member: discord.Member = None):
     if member == None:
         member = ctx.author
-    user_data = db.users.find_one({"$and":[
+    user_data = db.users.find_one({"$and": [
         {"discordId": member.id},
         {"serverId": ctx.guild.id}
     ]})
@@ -216,26 +237,29 @@ async def profile(ctx, member: discord.Member = None):
     likes = likes_count(user_data["twitterId"])
     followers, err = get_followers(user_data["twitterId"])
     following, err = get_following_count(user_data["twitterId"])
-    embed = discord.Embed(title="Username", description=user_data["username"], colour=discord.Colour.random())
+    embed = discord.Embed(
+        title="Username", description=user_data["username"], colour=discord.Colour.random())
     embed.set_author(name=f"{name}")
     embed.set_thumbnail(url=f"{pfp}")
-    embed.add_field(name="Likes 👍 ", value = likes)
-    embed.add_field(name="Followers 👥 ", value = len(followers), inline=True)
-    embed.add_field(name="Following ", value = following, inline=False)
-    embed.add_field(name="Coins 🪙 ", value = user_data["coins"], inline = True)
+    embed.add_field(name="Likes 👍 ", value=likes)
+    embed.add_field(name="Followers 👥 ", value=len(followers), inline=True)
+    embed.add_field(name="Following ", value=following, inline=False)
+    embed.add_field(name="Coins 🪙 ", value=user_data["coins"], inline=True)
     await ctx.send(embed=embed)
+
 
 @bot.command()
 async def beg(ctx):
     discordId = ctx.message.author.id
-    earnings = random.randrange(101);
+    earnings = random.randrange(101)
     try:
-        db.users.update_one({"discordId": discordId}, {"$inc" : {
+        db.users.update_one({"discordId": discordId}, {"$inc": {
             "wallet": earnings
         }})
         await ctx.send(f"Someone gave you {earnings} coins.")
     except Exception as e:
         await ctx.send(f"Some error occured!")
+
 
 @bot.command()
 async def balance(ctx):
@@ -244,16 +268,18 @@ async def balance(ctx):
         user_data = db.users.find_one({"discordId": discordId})
         wallet_amount = user_data["wallet"]
         bank_amount = user_data["bank"]
-        embed = discord.Embed(title=f"{ctx.author.name}'s balance 🪙", color =  discord.Colour.green())
-        
-        embed.add_field(name = "Wallet balance", value = wallet_amount)
-        embed.add_field(name = "Bank balance", value = bank_amount)
-        await ctx.send(embed = embed)
+        embed = discord.Embed(
+            title=f"{ctx.author.name}'s balance 🪙", color=discord.Colour.green())
+
+        embed.add_field(name="Wallet balance", value=wallet_amount)
+        embed.add_field(name="Bank balance", value=bank_amount)
+        await ctx.send(embed=embed)
 
     except Exception as e:
         await ctx.send(f"Some error occured!")
-    
-async def update_bank(user_discordId, change = 0, withdraw = 1):
+
+
+async def update_bank(user_discordId, change=0, withdraw=1):
     err = None
     try:
         user_data = db.users.find_one({"discordId": user_discordId})
@@ -262,29 +288,31 @@ async def update_bank(user_discordId, change = 0, withdraw = 1):
             return err
         if change < 0:
             err = "Amount should be positive!"
-        data = db.users.update_one({"discordId": user_discordId}, {"$inc" : {
+        data = db.users.update_one({"discordId": user_discordId}, {"$inc": {
             "bank": withdraw*change,
             "wallet": -1*withdraw*change
-        }})       
+        }})
 
     except Exception as e:
         err = "Some error occured!"
     return err
 
+
 @bot.command()
-async def withdraw(ctx, amount = None):
+async def withdraw(ctx, amount=None):
     if amount == None:
         await ctx.send("Please enter the amount!")
         return
     if amount.isnumeric():
         err = await update_bank(ctx.author.id, int(amount), -1)
-        if err==None:
-         await ctx.send(f"You withdrew {amount} coins")
+        if err == None:
+            await ctx.send(f"You withdrew {amount} coins")
     else:
         await ctx.send("Enter a Numeric Value")
 
+
 @bot.command()
-async def deposit(ctx, amount = None):
+async def deposit(ctx, amount=None):
     if amount == None:
         await ctx.send("Please enter the amount!")
         return
@@ -295,8 +323,9 @@ async def deposit(ctx, amount = None):
     else:
         await ctx.send("Enter a Numeric Value")
 
+
 @bot.command()
-async def send(ctx, member:discord.Member, amount = None):
+async def send(ctx, member: discord.Member, amount=None):
     if amount == None:
         await ctx.send("Please enter the amount!")
         return
@@ -305,7 +334,7 @@ async def send(ctx, member:discord.Member, amount = None):
     if amount1 < 0:
         await ctx.send("Amount should be positive!")
         return
-    
+
     user_data = db.users.find_one({"discordId": ctx.author.id})
     if user_data["wallet"] < amount1:
         await ctx.send("Insufficient balance!")
@@ -320,8 +349,9 @@ async def send(ctx, member:discord.Member, amount = None):
 
     await ctx.send(f"You sent {amount1} coins to {member.mention}")
 
+
 @bot.command()
-async def slots(ctx, amount = None):
+async def slots(ctx, amount=None):
     if amount == None:
         await ctx.send("Please enter the amount!")
         return
@@ -335,7 +365,7 @@ async def slots(ctx, amount = None):
     if user_data["wallet"] < amount1:
         await ctx.send("Insufficient balance!")
         return
-    
+
     final = []
     for i in range(3):
         a = random.choice(["🙂", "😁", "😉"])
@@ -355,8 +385,8 @@ async def slots(ctx, amount = None):
             "wallet": -1*amount1,
         }}) 
 
-@bot.command()  
-async def rob(ctx, member: discord.Member):  
+@bot.command()
+async def rob(ctx, member: discord.Member):
     user_data = db.users.find_one({"discordId": member.id})
     if user_data["wallet"] < 50:
         await ctx.send("It's not worth it!")
@@ -364,33 +394,88 @@ async def rob(ctx, member: discord.Member):
     earnings = random.randrange(0, user_data["wallet"])
     await db.users.update_one({"discordId": ctx.author.id}, {"$inc" : {
         "wallet": earnings,
-    }}) 
-    await db.users.update_one({"discordId": member.id}, {"$inc" : {
+    }})
+    await db.users.update_one({"discordId": member.id}, {"$inc": {
         "wallet": -1*earnings,
-    }}) 
+    }})
 
-    
-@bot.command(aliases=['8ball','test'])
+store = [{"name": "MacBook", "price": 940000, "description": "Macbook 2022"},
+         {"name": "Iphone", "price": 1200000, "description": "Iphone 18"},
+         {"name": "Apple Watch", "price": 400000,
+          "description": "Apple Watch Series 4"},
+         {"name": "Sanmsung S21", "price": 700000,
+             "description": "Samsung S21 with 64 MP Camera"},
+         ]
+
+
+@bot.command()
+async def shop(ctx):
+    em = discord.Embed(title="Shop")
+    for item in store:
+        name = item["name"]
+        price = item["price"]
+        desc = item["description"]
+        em.add_field(name=name, value=f"${price} | {desc}")
+    await ctx.send(embed=em)
+
+
+@bot.commad()
+async def buy(ctx, itemName, amount=1):
+    item_name = itemName.lower()
+    name_ = None
+    for item in store:
+        name = item["name"].lower()
+        if name == item_name:
+            name_ = name
+            price = item["price"]
+            break
+    if name_ == None:
+        await ctx.send("Item is not present in store.")
+        return
+
+    cost = amount * itemName
+    user_data = db.users.find_one({"discordId": ctx.guild.id})
+    if user_data["wallet"] < cost:
+        await ctx.send("Insufficient balance")
+        return
+    db.users.update_one({"discordId": ctx.guild.id}, {"$inc": {
+        "wallet": -1*cost,
+    }}, {"$push":{
+        "items": {
+            "name": itemName,
+            "amount": amount
+        }
+    }})
+    await ctx.send(f"You just bought {amount} {itemName}")
+
+@bot.command(aliases=['8ball', 'test'])
 async def eightball(ctx, *, question):
-    responses = ["As I see it, yes.", "Ask again later","Better not tell you now.", "Cannot predict now.", "Concentrate and ask again.", "Don't count on it.", "Is is certain", "It is decidedly no.","Most likely","My reply is NO.","My sources say NO.","Outlook not so good","Outlook good!","Signs point to yes!","Without a doubt!!"]
+    responses = ["As I see it, yes.", "Ask again later", "Better not tell you now.", "Cannot predict now.", "Concentrate and ask again.", "Don't count on it.", "Is is certain",
+                 "It is decidedly no.", "Most likely", "My reply is NO.", "My sources say NO.", "Outlook not so good", "Outlook good!", "Signs point to yes!", "Without a doubt!!"]
     await ctx.send(f"**Question:** {question}\n**Answers:** {random.choice(responses)}")
 
 
 # help pages
-page1 = discord.Embed(title="Bot Help 1", description="Use the buttons below to navigate between help pages.", colour=discord.Colour.orange())
-page2 = discord.Embed(title="Bot Help 2", description="Page 2", colour=discord.Colour.orange())
-page3 = discord.Embed(title="Bot Help 3", description="Page 3", colour=discord.Colour.orange())
+page1 = discord.Embed(
+    title="Bot Help 1", description="Use the buttons below to navigate between help pages.", colour=discord.Colour.orange())
+page2 = discord.Embed(title="Bot Help 2",
+                      description="Page 2", colour=discord.Colour.orange())
+page3 = discord.Embed(title="Bot Help 3",
+                      description="Page 3", colour=discord.Colour.orange())
 
 bot.help_pages = [page1, page2, page3]
+
+
 @bot.command()
 async def paginate(ctx):
-    buttons = [u"\u23EA", u"\u2B05", u"\u27A1", u"\u23E9"] # skip to start, left, right, skip to end
+    # skip to start, left, right, skip to end
+    buttons = [u"\u23EA", u"\u2B05", u"\u27A1", u"\u23E9"]
     current = 0
     msg = await ctx.send(embed=bot.help_pages[current])
-    
+
     for button in buttons:
         await msg.add_reaction(button)
-        
+
     while True:
         try:
             reaction, user = await bot.wait_for("reaction_add", check=lambda reaction, user: user == ctx.author and reaction.emoji in buttons, timeout=60.0)
@@ -402,11 +487,11 @@ async def paginate(ctx):
             previous_page = current
             if reaction.emoji == u"\u23EA":
                 current = 0
-                
+
             elif reaction.emoji == u"\u2B05":
                 if current > 0:
                     current -= 1
-                    
+
             elif reaction.emoji == u"\u27A1":
                 if current < len(bot.help_pages)-1:
                     current += 1
