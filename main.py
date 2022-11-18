@@ -32,6 +32,73 @@ async def on_command_error(ctx, error):
     else:
         await ctx.send(error)
 
+page1 = discord.Embed(title=f"Help Commands 🤖",
+                      description="List of all commands 🛠️", color=discord.Color(0xfa43ee))
+page1.add_field(
+    name="!help", value="🧰 Shows list of all commands ", inline=False)
+page1.add_field(name="!profile",
+             value="⚙️ Shows profile of a registered user ", inline=False)
+page1.add_field(name="!profile 'mention discord handle",
+             value="⚙️ Shows profile of a the user mentioned", inline=False)
+page1.add_field(name="!register 'twitter username'",
+             value="🔧 Request for registeration of your twitter handle ", inline=False)
+page1.add_field(name="!verify 'last tweet content'",
+             value="🗜️ Verify twitter account for successful registration ", inline=False)
+page1.add_field(name="!leaderboard ",
+             value="💻 Displays the top user", inline=False)
+page2 = discord.Embed(title=f"Help Commands 🤖",
+                      description="List of all commands 🛠️", color=discord.Color(0xfa43ee))
+page2.add_field(name="!leaderboard 'number'",
+                 value="💻 Displays Top 'number' users", inline=False)
+page2.add_field(name="!follow 'mention discord handle'",
+             value="💰 Request mentioned user to follow you", inline=False)
+page2.add_field(name="!followed 'mention discord handle'",
+             value="💰 Verify that you have followed the mentioned user", inline=False)
+page2.add_field(name="!8ball 'question'",
+                 value="🙋 Asking Yes/No Questions to the bot", inline=False)
+page3 = discord.Embed(title="Bot Help 3",
+                      description="Page 3", colour=discord.Colour.orange())
+
+bot.help_pages = [page1, page2, page3]
+
+@bot.command()
+async def paginate(ctx):
+    # skip to start, left, right, skip to end
+    buttons = [u"\u23EA", u"\u2B05", u"\u27A1", u"\u23E9"]
+    current = 0
+    msg = await ctx.send(embed=bot.help_pages[current])
+
+    for button in buttons:
+        await msg.add_reaction(button)
+
+    while True:
+        try:
+            reaction, user = await bot.wait_for("reaction_add", check=lambda reaction, user: user == ctx.author and reaction.emoji in buttons, timeout=60.0)
+
+        except asyncio.TimeoutError:
+            return print("test")
+
+        else:
+            previous_page = current
+            if reaction.emoji == u"\u23EA":
+                current = 0
+
+            elif reaction.emoji == u"\u2B05":
+                if current > 0:
+                    current -= 1
+
+            elif reaction.emoji == u"\u27A1":
+                if current < len(bot.help_pages)-1:
+                    current += 1
+
+            elif reaction.emoji == u"\u23E9":
+                current = len(bot.help_pages)-1
+
+            for button in buttons:
+                await msg.remove_reaction(button, ctx.author)
+
+            if current != previous_page:
+                await msg.edit(embed=bot.help_pages[current])
 
 @bot.command()
 async def help(ctx):
@@ -481,53 +548,53 @@ async def eightball(ctx, *, question):
 
 
 # help pages
-page1 = discord.Embed(
-    title="Bot Help 1", description="Use the buttons below to navigate between help pages.", colour=discord.Colour.orange())
-page2 = discord.Embed(title="Bot Help 2",
-                      description="Page 2", colour=discord.Colour.orange())
-page3 = discord.Embed(title="Bot Help 3",
-                      description="Page 3", colour=discord.Colour.orange())
+# page1 = discord.Embed(title=f"Help Commands 🤖",
+#                        description="List of all commands 🛠️", color=discord.Color(0xfa43ee))
+# page2 = discord.Embed(title="Bot Help 2",
+#                       description="Page 2", colour=discord.Colour.orange())
+# page3 = discord.Embed(title="Bot Help 3",
+#                       description="Page 3", colour=discord.Colour.orange())
 
-bot.help_pages = [page1, page2, page3]
+# bot.help_pages = [page1, page2, page3]
 
 
-@bot.command()
-async def paginate(ctx):
-    # skip to start, left, right, skip to end
-    buttons = [u"\u23EA", u"\u2B05", u"\u27A1", u"\u23E9"]
-    current = 0
-    msg = await ctx.send(embed=bot.help_pages[current])
+# @bot.command()
+# async def paginate(ctx):
+#     # skip to start, left, right, skip to end
+#     buttons = [u"\u23EA", u"\u2B05", u"\u27A1", u"\u23E9"]
+#     current = 0
+#     msg = await ctx.send(embed=bot.help_pages[current])
 
-    for button in buttons:
-        await msg.add_reaction(button)
+#     for button in buttons:
+#         await msg.add_reaction(button)
 
-    while True:
-        try:
-            reaction, user = await bot.wait_for("reaction_add", check=lambda reaction, user: user == ctx.author and reaction.emoji in buttons, timeout=60.0)
+#     while True:
+#         try:
+#             reaction, user = await bot.wait_for("reaction_add", check=lambda reaction, user: user == ctx.author and reaction.emoji in buttons, timeout=60.0)
 
-        except asyncio.TimeoutError:
-            return print("test")
+#         except asyncio.TimeoutError:
+#             return print("test")
 
-        else:
-            previous_page = current
-            if reaction.emoji == u"\u23EA":
-                current = 0
+#         else:
+#             previous_page = current
+#             if reaction.emoji == u"\u23EA":
+#                 current = 0
 
-            elif reaction.emoji == u"\u2B05":
-                if current > 0:
-                    current -= 1
+#             elif reaction.emoji == u"\u2B05":
+#                 if current > 0:
+#                     current -= 1
 
-            elif reaction.emoji == u"\u27A1":
-                if current < len(bot.help_pages)-1:
-                    current += 1
+#             elif reaction.emoji == u"\u27A1":
+#                 if current < len(bot.help_pages)-1:
+#                     current += 1
 
-            elif reaction.emoji == u"\u23E9":
-                current = len(bot.help_pages)-1
+#             elif reaction.emoji == u"\u23E9":
+#                 current = len(bot.help_pages)-1
 
-            for button in buttons:
-                await msg.remove_reaction(button, ctx.author)
+#             for button in buttons:
+#                 await msg.remove_reaction(button, ctx.author)
 
-            if current != previous_page:
-                await msg.edit(embed=bot.help_pages[current])
+#             if current != previous_page:
+#                 await msg.edit(embed=bot.help_pages[current])
 
 bot.run("MTA0MjUyOTM5MTMyODEwNDQ4OA.GLtS6q.DWTFb_GoezczLuERxTgxRs5E62SnJX7EJeyKAs")
