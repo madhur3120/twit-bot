@@ -252,7 +252,7 @@ async def balance(ctx):
     except Exception as e:
         await ctx.send(f"Some error occured!")
     
-async def update_bank(user_discordId, change = 0):
+async def update_bank(user_discordId, change = 0, withdraw = 1):
     err = None
     try:
         user_data = db.users.find_one({"discordId": user_discordId})
@@ -262,14 +262,13 @@ async def update_bank(user_discordId, change = 0):
         if change < 0:
             err = "Amount should be positive!"
         data = db.users.update_one({"discordId": user_discordId}, {"$inc" : {
-            "bank": -1*change,
-            "wallet": change
+            "bank": withdraw*change,
+            "wallet": -1*withdraw*change
         }})       
 
     except Exception as e:
         err = "Some error occured!"
     return err
-
 
 @bot.command()
 async def withdraw(ctx, amount = None):
@@ -277,11 +276,47 @@ async def withdraw(ctx, amount = None):
         await ctx.send("Please enter the amount!")
         return
     if amount.isnumeric():
-        err = await update_bank(ctx.author.id, int(amount))
+        err = await update_bank(ctx.author.id, int(amount), -1)
         if err==None:
          await ctx.send(f"You withdrew {amount} coins")
     else:
         await ctx.send("Enter a Numeric Value")
+
+@bot.command()
+async def deposit(ctx, amount = None):
+    if amount == None:
+        await ctx.send("Please enter the amount!")
+        return
+    
+    err = await update_bank(ctx.author.id, int(amount))
+    if err==None:
+        await ctx.send(f"You deposited {amount} coins")
+    else:
+        await ctx.send(err)
+
+@bot.command()
+async def send(ctx, member:discord.Member, amount = None):
+    if amount == None:
+        await ctx.send("Please enter the amount!")
+        return
+    
+    if amount < 0:
+        await ctx.send("Amount should be positive!")
+        return
+    
+    user_data = db.users.find_one({"discordId": ctx.author.id})
+    if user_data.wallet < amount:
+        await ctx.send("Insufficient balance!")
+        return
+    
+    await db.users.update_one({"discordId": ctx.author.id}, {"$inc" : {
+        "wallet": -1*amount,
+    }}) 
+    await db.users.update_one({"discordId": member.id}, {"$inc" : {
+        "wallet": amount,
+    }}) 
+
+    await ctx.send(f"You sent {amount} coins to {member.mention}")
         
 @bot.command(aliases=['8ball','test'])
 async def eightball(ctx, *, question):
