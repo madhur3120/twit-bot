@@ -45,7 +45,7 @@ async def register(ctx, arg1):
         await ctx.reply(f"Given username is invalid! 😕")
     else:
         try:
-            register_instance = db.register_instances.find_one({"discordId" : discordId})
+            register_instance = db.users.find_one({"discordId" : discordId})
             lastTweetContent = last_tweet(res)
             if register_instance==None:
                 db.register_instances.insert_one({
@@ -57,7 +57,7 @@ async def register(ctx, arg1):
                     "inserted": datetime.utcnow()})
                 await ctx.reply(f"Tweet Something in 120 seconds! Then use !verify with the content of tweet for verification of your twitter handle.")
             else:
-                await ctx.reply(f"You have already registered!")
+                await ctx.reply(f"You have already registered! 🙂")
         except Exception as e:
             print("Exception ",e)
 

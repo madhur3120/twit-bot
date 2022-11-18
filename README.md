@@ -2,6 +2,9 @@
 
 Our submission for build a bot competetion organised by GDSC IIIT Sri City
 
+To Invite TwitBot - Copy this URL and paste it in browser tab
+https://discord.com/api/oauth2/authorize?client_id=1042529391328104488&permissions=8&scope=bot%20applications.commands
+
 Supported Commands-
 
 1. Help
@@ -13,7 +16,7 @@ Supported Commands-
    !register xyz_twitter_username -> Request for verification of xyz_twitter_username
 4. Verify
    !verify content_of_last_tweet -> Verify the twitter handle requested for verification
-5. Leaderboard
+5. Leaderboard (Leaderboard is generated on the basis of likes on last 10 tweets, retweets and replies)
    !leaderboard -> Shows the user with most likes.
    !leaderboard x -> Shows the top x users with most likes.
 6. Follow
