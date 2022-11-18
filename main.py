@@ -3,6 +3,7 @@ import random
 from discord.ext import commands
 from tweepy_setup import *
 import pymongo
+import asyncio
 from datetime import datetime
 import certifi
 import random
@@ -287,76 +288,80 @@ async def deposit(ctx, amount = None):
     if amount == None:
         await ctx.send("Please enter the amount!")
         return
-    
-    err = await update_bank(ctx.author.id, int(amount))
-    if err==None:
-        await ctx.send(f"You deposited {amount} coins")
+    if amount.isnumeric():
+        err = await update_bank(ctx.author.id, int(amount))
+        if err==None:
+            await ctx.send(f"You deposited {amount} coins")
     else:
-        await ctx.send(err)
+        await ctx.send("Enter a Numeric Value")
 
 @bot.command()
 async def send(ctx, member:discord.Member, amount = None):
     if amount == None:
         await ctx.send("Please enter the amount!")
         return
-    
-    if amount < 0:
+    if amount.isnumeric():
+        amount1=int(amount)
+    if amount1 < 0:
         await ctx.send("Amount should be positive!")
         return
     
     user_data = db.users.find_one({"discordId": ctx.author.id})
-    if user_data.wallet < amount:
+    if user_data["wallet"] < amount1:
         await ctx.send("Insufficient balance!")
         return
     
-    await db.users.update_one({"discordId": ctx.author.id}, {"$inc" : {
-        "wallet": -1*amount,
+    db.users.update_one({"discordId": ctx.author.id}, {"$inc" : {
+        "wallet": -1*amount1,
     }}) 
-    await db.users.update_one({"discordId": member.id}, {"$inc" : {
-        "wallet": amount,
+    db.users.update_one({"discordId": member.id}, {"$inc" : {
+        "wallet": amount1,
     }}) 
 
-    await ctx.send(f"You sent {amount} coins to {member.mention}")
+    await ctx.send(f"You sent {amount1} coins to {member.mention}")
 
 @bot.command()
 async def slots(ctx, amount = None):
     if amount == None:
         await ctx.send("Please enter the amount!")
         return
-    
-    if amount < 0:
+    if amount.isnumeric():
+        amount1=int(amount)
+    if amount1 < 0:
         await ctx.send("Amount should be positive!")
         return
 
     user_data = db.users.find_one({"discordId": ctx.author.id})
-    if user_data.wallet < amount:
+    if user_data["wallet"] < amount1:
         await ctx.send("Insufficient balance!")
         return
     
     final = []
     for i in range(3):
         a = random.choice(["🙂", "😁", "😉"])
+        final.append(a)
     
-    final.append(a)
 
     await ctx.send(str(final))
 
     if final[0] == final[1] or final[2] == final[2] or final[1] == final[2]:
-        await db.users.update_one({"discordId": ctx.author.id}, {"$inc" : {
-            "wallet": 2*amount,
+        await ctx.send("You Won Double the Money!!!")
+        db.users.update_one({"discordId": ctx.author.id}, {"$inc" : {
+            "wallet": 2*amount1,
         }}) 
     else:
-        await db.users.update_one({"discordId":ctx.author.id}, {"$inc" : {
-            "wallet": -1*amount,
+        await ctx.send("Alas! You Lost Your Money")
+        db.users.update_one({"discordId":ctx.author.id}, {"$inc" : {
+            "wallet": -1*amount1,
         }}) 
 
 @bot.command()  
 async def rob(ctx, member: discord.Member):  
     user_data = db.users.find_one({"discordId": member.id})
-    if user_data.wallet < 50:
+    if user_data["wallet"] < 50:
         await ctx.send("It's not worth it!")
         return
-    earnings = random.randrange(0, user_data.wallet)
+    earnings = random.randrange(0, user_data["wallet"])
     await db.users.update_one({"discordId": ctx.author.id}, {"$inc" : {
         "wallet": earnings,
     }}) 
