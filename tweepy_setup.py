@@ -49,6 +49,27 @@ def likes_count(id):
             break
     return count
 
+def get_user_liked(id1, id2, content):
+    count = 0
+    tweet_count = 0
+    print(id)
+    for tweet in client.get_users_tweets(id2).data:
+        exists = False
+        if tweet.text == content:
+            exists = True
+            try:
+                li =  client.get_liking_users(tweet.id).data
+                for d in li:
+                    print(d)
+                    print(d["id"])
+                    if d["id"]==id1:
+                        return True, tweet.id, exists;
+            except Exception as e:
+                return False, None, True
+            print()
+    return False, None, exists
+
+
 def get_followers(twitterId):
     followers = 0
     err= "",
