@@ -37,32 +37,48 @@ page1 = discord.Embed(title=f"Help Commands 🤖",
 page1.add_field(
     name="!help", value="🧰 Shows list of all commands ", inline=False)
 page1.add_field(name="!profile",
-             value="⚙️ Shows profile of a registered user ", inline=False)
+                value="⚙️ Shows profile of a registered user ", inline=False)
 page1.add_field(name="!profile 'mention discord handle",
-             value="⚙️ Shows profile of a the user mentioned", inline=False)
+                value="⚙️ Shows profile of a the user mentioned", inline=False)
 page1.add_field(name="!register 'twitter username'",
-             value="🔧 Request for registeration of your twitter handle ", inline=False)
+                value="🔧 Request for registeration of your twitter handle ", inline=False)
 page1.add_field(name="!verify 'last tweet content'",
-             value="🗜️ Verify twitter account for successful registration ", inline=False)
+                value="🗜️ Verify twitter account for successful registration ", inline=False)
 page1.add_field(name="!leaderboard ",
-             value="💻 Displays the top user", inline=False)
+                value="💻 Displays the top user", inline=False)
+page2.add_field(name="!slots 'amount'",
+                value="🔧 Play a Slot game for double money. If all the emojis are same, you win else you lose ", inline=False)
 page2 = discord.Embed(title=f"Help Commands 🤖",
                       description="List of all commands 🛠️", color=discord.Color(0xfa43ee))
 page2.add_field(name="!leaderboard 'number'",
-                 value="💻 Displays Top 'number' users", inline=False)
+                value="💻 Displays Top 'number' users", inline=False)
 page2.add_field(name="!follow 'mention discord handle'",
-             value="💰 Request mentioned user to follow you", inline=False)
+                value="💰 Request mentioned user to follow you", inline=False)
+page2.add_field(name="!rob 'mention discord handle'",
+                value="💸  Steal some money from mentioned user's wallet", inline=False)
 page2.add_field(name="!followed 'mention discord handle'",
-             value="💰 Verify that you have followed the mentioned user", inline=False)
+                value="🤑 Verify that you have followed the mentioned user", inline=False)
 page2.add_field(name="!8ball 'question'",
-                 value="🙋 Asking Yes/No Questions to the bot", inline=False)
-page3 = discord.Embed(title="Bot Help 3",
-                      description="Page 3", colour=discord.Colour.orange())
-
+                value="🙋 Asking Yes/No Questions to the bot", inline=False)
+page3 = discord.Embed(title="!beg",
+                      description="👛 Beg some coins from the bot", colour=discord.Colour.orange())
+page3 = discord.Embed(title="!balance",
+                      description="💸 Check Your Wallet and Bank Balance", colour=discord.Colour.orange())
+page3 = discord.Embed(title="!deposit 'amount'",
+                      description="🤑 Deposit money from the wallet to the bank", colour=discord.Colour.orange())
+page3 = discord.Embed(title="!withdraw 'amount'",
+                      description="💰 Withdraw money from the bank to wallet", colour=discord.Colour.orange())
+page3 = discord.Embed(title="!send 'mention discord handle' 'amount'",
+                      description="💸 Send money from your wallet to the mentioned user's wallet", colour=discord.Colour.orange())
+page3.add_field(name="!shop",
+                value="💻 Displays the list of items present in store", inline=False)
+page3.add_field(name="!buy 'item's name' 'quantitiy'",
+                value="💰 Buy an item from the shop and add it your collection.", inline=False)
 bot.help_pages = [page1, page2, page3]
 
+
 @bot.command()
-async def paginate(ctx):
+async def help(ctx):
     # skip to start, left, right, skip to end
     buttons = [u"\u23EA", u"\u2B05", u"\u27A1", u"\u23E9"]
     current = 0
@@ -99,32 +115,6 @@ async def paginate(ctx):
 
             if current != previous_page:
                 await msg.edit(embed=bot.help_pages[current])
-
-@bot.command()
-async def help(ctx):
-    em = discord.Embed(title=f"Help Commands 🤖",
-                       description="List of all commands 🛠️", color=discord.Color(0xfa43ee))
-    em.add_field(
-        name="!help", value="🧰 Shows list of all commands ", inline=False)
-    em.add_field(name="!profile",
-                 value="⚙️ Shows profile of a registered user ", inline=False)
-    em.add_field(name="!profile 'mention discord handle",
-                 value="⚙️ Shows profile of a the user mentioned", inline=False)
-    em.add_field(name="!register 'twitter username'",
-                 value="🔧 Request for registeration of your twitter handle ", inline=False)
-    em.add_field(name="!verify 'last tweet content'",
-                 value="🗜️ Verify twitter account for successful registration ", inline=False)
-    em.add_field(name="!leaderboard ",
-                 value="💻 Displays the top user", inline=False)
-    em.add_field(name="!leaderboard 'number'",
-                 value="💻 Displays Top 'number' users", inline=False)
-    em.add_field(name="!follow 'mention discord handle'",
-                 value="💰 Request mentioned user to follow you", inline=False)
-    em.add_field(name="!followed 'mention discord handle'",
-                 value="💰 Verify that you have followed the mentioned user", inline=False)
-    em.add_field(name="!8ball 'question'",
-                 value="🙋 Asking Yes/No Questions to the bot", inline=False)
-    await ctx.send(embed=em)
 
 
 @bot.command()
@@ -275,7 +265,7 @@ async def followed(ctx, member: discord.Member):
                 data = db.users.update_one({"discordId": requestingDiscordId}, {"$inc": {
                     "coins": -50
                 }})
-                data = db.users.update_one({"discordId": requestingDiscordId}, {"$push":{
+                data = db.users.update_one({"discordId": requestingDiscordId}, {"$push": {
                     "followers": request_instance["requestedUserTwitterId"]
                 }})
                 await ctx.reply("Successfully verified! You have gained 50 coins.")
@@ -290,6 +280,7 @@ async def followed(ctx, member: discord.Member):
         print("e ", e)
         await ctx.reply(f"No request was made by {member.mention}")
 
+
 @bot.command()
 async def report(ctx, member: discord.Member = None):
     if member == None:
@@ -300,12 +291,13 @@ async def report(ctx, member: discord.Member = None):
         user_instance = db.users.find_one({"discordId": userId})
         if user_instance == None:
             await ctx.reply(f"You are not registered.")
-        report_user_instance = db.users.find_one({"discordId": reportUserId}) 
+        report_user_instance = db.users.find_one({"discordId": reportUserId})
         if report_user_instance == None:
             await ctx.reply(f"User you are reporting is not registered.")
         followers, err = get_followers(user_instance["twitterId"])
         print(followers)
-        check = any(follower for follower in followers if follower["id"] == report_user_instance["twitterId"])
+        check = any(
+            follower for follower in followers if follower["id"] == report_user_instance["twitterId"])
         print(check)
         if check:
             await ctx.reply("False report. The user is still following you.")
@@ -317,14 +309,16 @@ async def report(ctx, member: discord.Member = None):
                 "coins": -100
             }})
             print("update")
-            db.users.update_one({"discordId": userId}, {"$pull":{
+            db.users.update_one({"discordId": userId}, {"$pull": {
                 "followers": report_user_instance["twitterId"]
             }})
             print("update2")
             await ctx.reply("Report found true. 100 coins deducted from {member.mention} and added to your account.")
     except Exception as e:
         print(e)
-        await ctx.reply("Some error occured");
+        await ctx.reply("Some error occured")
+
+
 @bot.command()
 async def profile(ctx, member: discord.Member = None):
     if member == None:
@@ -345,10 +339,10 @@ async def profile(ctx, member: discord.Member = None):
         title="Username", description=user_data["username"], colour=discord.Colour.random())
     embed.set_author(name=f"{name}")
     embed.set_thumbnail(url=f"{pfp}")
-    embed.add_field(name="Likes 👍 ", value = likes)
-    embed.add_field(name="Followers 👥 ", value = len(followers), inline=True)
-    embed.add_field(name="Following ", value = following, inline=False)
-    embed.add_field(name="Wallet 🪙 ", value = user_data["wallet"], inline = True)
+    embed.add_field(name="Likes 👍 ", value=likes)
+    embed.add_field(name="Followers 👥 ", value=len(followers), inline=True)
+    embed.add_field(name="Following ", value=following, inline=False)
+    embed.add_field(name="Wallet 🪙 ", value=user_data["wallet"], inline=True)
     await ctx.send(embed=embed)
 
 
@@ -402,15 +396,16 @@ async def update_bank_withdraw(user_discordId, change=0):
         err = "Some error occured!"
     return err
 
+
 async def update_bank_deposit(user_discordId, change=0):
     err = None
     try:
         user_data = db.users.find_one({"discordId": user_discordId})
         if user_data["wallet"] < change:
-            err="You don't have enough money in your wallet!"
+            err = "You don't have enough money in your wallet!"
             return err
         if change < 0:
-            err="Amount should be positive!"
+            err = "Amount should be positive!"
             return err
         data = db.users.update_one({"discordId": user_discordId}, {"$inc": {
             "bank": change,
@@ -443,9 +438,9 @@ async def deposit(ctx, amount=None):
         await ctx.send("Please enter the amount!")
         return
     if amount.isnumeric():
-        amount1=int(amount)
+        amount1 = int(amount)
         err = await update_bank_deposit(ctx.author.id, amount1)
-        if err==None:
+        if err == None:
             await ctx.send(f"You deposited {amount1} coins")
         else:
             await ctx.send(err)
@@ -459,7 +454,7 @@ async def send(ctx, member: discord.Member, amount=None):
         await ctx.send("Please enter the amount!")
         return
     if amount.isnumeric():
-        amount1=int(amount)
+        amount1 = int(amount)
     if amount1 < 0:
         await ctx.send("Amount should be positive!")
         return
@@ -468,13 +463,13 @@ async def send(ctx, member: discord.Member, amount=None):
     if user_data["wallet"] < amount1:
         await ctx.send("Insufficient balance!")
         return
-    
-    db.users.update_one({"discordId": ctx.author.id}, {"$inc" : {
+
+    db.users.update_one({"discordId": ctx.author.id}, {"$inc": {
         "wallet": -1*amount1,
-    }}) 
-    db.users.update_one({"discordId": member.id}, {"$inc" : {
+    }})
+    db.users.update_one({"discordId": member.id}, {"$inc": {
         "wallet": amount1,
-    }}) 
+    }})
 
     await ctx.send(f"You sent {amount1} coins to {member.mention}")
 
@@ -485,7 +480,7 @@ async def slots(ctx, amount=None):
         await ctx.send("Please enter the amount!")
         return
     if amount.isnumeric():
-        amount1=int(amount)
+        amount1 = int(amount)
     if amount1 < 0:
         await ctx.send("Amount should be positive!")
         return
@@ -499,20 +494,20 @@ async def slots(ctx, amount=None):
     for i in range(3):
         a = random.choice(["🙂", "😁", "😉"])
         final.append(a)
-    
 
     await ctx.send(str(final))
 
     if final[0] == final[1] or final[2] == final[2] or final[1] == final[2]:
         await ctx.send("You Won Double the Money!!!")
-        db.users.update_one({"discordId": ctx.author.id}, {"$inc" : {
+        db.users.update_one({"discordId": ctx.author.id}, {"$inc": {
             "wallet": 2*amount1,
-        }}) 
+        }})
     else:
         await ctx.send("Alas! You Lost Your Money")
-        db.users.update_one({"discordId":ctx.author.id}, {"$inc" : {
+        db.users.update_one({"discordId": ctx.author.id}, {"$inc": {
             "wallet": -1*amount1,
-        }}) 
+        }})
+
 
 @bot.command()
 async def rob(ctx, member: discord.Member):
@@ -521,7 +516,7 @@ async def rob(ctx, member: discord.Member):
         await ctx.send("It's not worth it!")
         return
     earnings = random.randrange(0, user_data["wallet"])
-    await db.users.update_one({"discordId": ctx.author.id}, {"$inc" : {
+    await db.users.update_one({"discordId": ctx.author.id}, {"$inc": {
         "wallet": earnings,
     }})
     await db.users.update_one({"discordId": member.id}, {"$inc": {
@@ -571,13 +566,15 @@ async def buy(ctx, itemName, amount=1):
     db.users.update_one({"discordId": ctx.message.author.id}, {"$inc": {
         "wallet": -1*cost,
     }})
-    db.users.update_one({"discordId": ctx.message.author.id}, {"$push":{
+    db.users.update_one({"discordId": ctx.message.author.id}, {"$push": {
         "items": {
             "name": itemName,
             "amount": amount
         }}})
-    
+
     await ctx.send(f"You just bought {amount} {itemName}")
+
+
 @bot.command()
 async def bag(ctx):
     user_instance = db.users.find_one({
@@ -590,8 +587,10 @@ async def bag(ctx):
     total_item = []
     for item in items:
         print(items)
-        total_item[item.name]+=int(amount)
-    print(item);
+        total_item[item.name] += int(amount)
+    print(item)
+
+
 @bot.command(aliases=['8ball', 'test'])
 async def eightball(ctx, *, question):
     responses = ["As I see it, yes.", "Ask again later", "Better not tell you now.", "Cannot predict now.", "Concentrate and ask again.", "Don't count on it.", "Is is certain",
