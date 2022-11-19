@@ -306,15 +306,15 @@ async def followed(ctx, member: discord.Member):
                 follower for follower in followers if follower["id"] == request_instance["requestedUserTwitterId"])
             if check:
                 data = db.users.update_one({"discordId": requestedDiscordId}, {"$inc": {
-                    "wallet": 50
+                    "wallet": 75
                 }})
                 data = db.users.update_one({"discordId": requestingDiscordId}, {"$inc": {
-                    "wallet": -50
+                    "wallet": -75
                 }})
                 data = db.users.update_one({"discordId": requestingDiscordId}, {"$push": {
                     "followers": request_instance["requestedUserTwitterId"]
                 }})
-                await ctx.reply("Successfully verified! You have gained 50 wallet.")
+                await ctx.reply("Successfully verified! You have gained 75 wallet.")
                 return
             else:
                 await ctx.reply("You have not followed the user!")
@@ -345,12 +345,12 @@ async def liked(ctx, member: discord.Member, content):
             check, tweetId, exists = get_user_liked(request_instance["requestedUserTwitterId"], request_instance["requestingUserTwitterId"], request_instance["tweetContent"])
             if check:
                 data = db.users.update_one({"discordId": requestedDiscordId}, {"$inc": {
-                    "wallet": 50
+                    "wallet": 25
                 }})
                 data = db.users.update_one({"discordId": requestingDiscordId}, {"$inc": {
-                    "wallet": -50
+                    "wallet": -25
                 }})
-                await ctx.reply("Successfully verified! You have gained 50 wallet.")
+                await ctx.reply("Successfully verified! You have gained 25s wallet.")
                 return
             else:
                 await ctx.reply("You have not liked the post!")
@@ -605,11 +605,11 @@ async def rob(ctx, member: discord.Member):
         "wallet": -1*earnings,
     }})
 
-store = [{"name": "MacBook", "price": 9400, "description": "Macbook 2022"},
-         {"name": "Iphone", "price": 12000, "description": "Iphone 18"},
-         {"name": "Apple Watch", "price": 4000,
+store = [{"name": "MacBook", "price": 940, "description": "Macbook 2022"},
+         {"name": "Iphone", "price": 1200, "description": "Iphone 18"},
+         {"name": "Apple Watch", "price": 400,
           "description": "Apple Watch Series 4"},
-         {"name": "Sanmsung S21", "price": 7000,
+         {"name": "Sanmsung S21", "price": 700,
              "description": "Samsung S21 with 64 MP Camera"},
          ]
 
