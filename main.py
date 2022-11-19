@@ -275,6 +275,9 @@ async def followed(ctx, member: discord.Member):
                 data = db.users.update_one({"discordId": requestingDiscordId}, {"$inc": {
                     "coins": -50
                 }})
+                data = db.users.update_one({"discordId": requestingDiscordId}, {"$push":{
+                    "followers": request_instance["requestedUserTwitterId"]
+                }})
                 await ctx.reply("Successfully verified! You have gained 50 coins.")
                 return
             else:
@@ -287,7 +290,41 @@ async def followed(ctx, member: discord.Member):
         print("e ", e)
         await ctx.reply(f"No request was made by {member.mention}")
 
-
+@bot.command()
+async def report(ctx, member: discord.Member = None):
+    if member == None:
+        await ctx.reply(f"Mention the user whom you want to report.")
+    userId = ctx.message.author.id
+    reportUserId = member.id
+    try:
+        user_instance = db.users.find_one({"discordId": userId})
+        if user_instance == None:
+            await ctx.reply(f"You are not registered.")
+        report_user_instance = db.users.find_one({"discordId": reportUserId}) 
+        if report_user_instance == None:
+            await ctx.reply(f"User you are reporting is not registered.")
+        followers, err = get_followers(user_instance["twitterId"])
+        print(followers)
+        check = any(follower for follower in followers if follower["id"] == report_user_instance["twitterId"])
+        print(check)
+        if check:
+            await ctx.reply("False report. The user is still following you.")
+        else:
+            db.users.update_one({"discordId": userId}, {"$inc": {
+                "coins": 100
+            }})
+            db.users.update_one({"discordId": reportUserId}, {"$inc": {
+                "coins": -100
+            }})
+            print("update")
+            db.users.update_one({"discordId": userId}, {"$pull":{
+                "followers": report_user_instance["twitterId"]
+            }})
+            print("update2")
+            await ctx.reply("Report found true. 100 coins deducted from {member.mention} and added to your account.")
+    except Exception as e:
+        print(e)
+        await ctx.reply("Some error occured");
 @bot.command()
 async def profile(ctx, member: discord.Member = None):
     if member == None:
@@ -491,11 +528,11 @@ async def rob(ctx, member: discord.Member):
         "wallet": -1*earnings,
     }})
 
-store = [{"name": "MacBook", "price": 940000, "description": "Macbook 2022"},
-         {"name": "Iphone", "price": 1200000, "description": "Iphone 18"},
-         {"name": "Apple Watch", "price": 400000,
+store = [{"name": "MacBook", "price": 9400, "description": "Macbook 2022"},
+         {"name": "Iphone", "price": 12000, "description": "Iphone 18"},
+         {"name": "Apple Watch", "price": 4000,
           "description": "Apple Watch Series 4"},
-         {"name": "Sanmsung S21", "price": 700000,
+         {"name": "Sanmsung S21", "price": 7000,
              "description": "Samsung S21 with 64 MP Camera"},
          ]
 
@@ -507,7 +544,7 @@ async def shop(ctx):
         name = item["name"]
         price = item["price"]
         desc = item["description"]
-        em.add_field(name=name, value=f"${price} | {desc}")
+        em.add_field(name=name, value=f"${price} | {desc}", inline=False)
     await ctx.send(embed=em)
 
 
@@ -525,21 +562,36 @@ async def buy(ctx, itemName, amount=1):
         await ctx.send("Item is not present in store.")
         return
 
-    cost = amount * itemName
-    user_data = db.users.find_one({"discordId": ctx.guild.id})
+    cost = int(amount) * price
+    user_data = db.users.find_one({"discordId": ctx.message.author.id})
+
     if user_data["wallet"] < cost:
         await ctx.send("Insufficient balance")
         return
-    db.users.update_one({"discordId": ctx.guild.id}, {"$inc": {
+    db.users.update_one({"discordId": ctx.message.author.id}, {"$inc": {
         "wallet": -1*cost,
-    }}, {"$push":{
+    }})
+    db.users.update_one({"discordId": ctx.message.author.id}, {"$push":{
         "items": {
             "name": itemName,
             "amount": amount
-        }
-    }})
+        }}})
+    
     await ctx.send(f"You just bought {amount} {itemName}")
-
+@bot.command()
+async def bag(ctx):
+    user_instance = db.users.find_one({
+        "discordId": ctx.message.author.id
+    })
+    if user_instance == None:
+        ctx.reply("You are not registered.")
+    items = user_instance.items
+    print(items)
+    total_item = []
+    for item in items:
+        print(items)
+        total_item[item.name]+=int(amount)
+    print(item);
 @bot.command(aliases=['8ball', 'test'])
 async def eightball(ctx, *, question):
     responses = ["As I see it, yes.", "Ask again later", "Better not tell you now.", "Cannot predict now.", "Concentrate and ask again.", "Don't count on it.", "Is is certain",
