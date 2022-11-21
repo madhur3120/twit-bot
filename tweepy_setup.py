@@ -1,14 +1,18 @@
 import tweepy
+import os
+from dotenv import load_dotenv
 
-api_key = "IuMVrLtepL3WBMiReobjXmlsh"
-api_secret = "w24tlUcCLjfwiTVXm4gaGTSq6PcnJwugOywSnnQumtXQJabPT5"
-bearer_token = r"AAAAAAAAAAAAAAAAAAAAAMGojQEAAAAAepVhSxL0s4kR3UqoZXPrrKCNSaA%3Dgt2eISsj71V8F1TuCHiTepEpAskZJKVJsMBSMO3j4YFLZY7w3z"
-access_token = "811458373430296576-zFTGn8CfFLNTOftWiEb04aaOx5meLHu"
-access_token_secret = "veNegEnEYwTr5ywTkDKwS1F33JaP4pGv1THxdqiqInHAh"
+load_dotenv()
 
-client = tweepy.Client(bearer_token, api_key, api_secret, access_token, access_token_secret)
+API_KEY = os.getenv('API_KEY')
+API_SECRET = os.getenv('API_SECRET')
+BEARER_TOKEN = os.getenv('BEARER_TOKEN')
+ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
+ACCESS_TOKEN_SECRET = os.getenv('ACCESS_TOKEN_SECRET')
 
-auth = tweepy.OAuth1UserHandler(api_key, api_secret, access_token, access_token_secret)
+client = tweepy.Client(BEARER_TOKEN, API_KEY, API_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+
+auth = tweepy.OAuth1UserHandler(API_KEY, API_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 api = tweepy.API(auth)
 
 def get_user_id(name):
