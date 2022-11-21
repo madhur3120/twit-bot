@@ -1,6 +1,0 @@
-While verification last wteet should be made after the user instances is created
-individual embed for likes - with avatar -- done
-tweet time should be after the instance --remaining
-asking questions from the bot 
-help command for the bot - commands display
-transactions - coins based on followers and likes

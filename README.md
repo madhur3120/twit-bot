@@ -25,6 +25,10 @@ Supported Commands-
    !followed @xyz -> Request for verification that you have followed the user requested you to follow him
 8. 8ball
    !8ball "question" -> Ask randow question to get Yes/No answer.
+9. Like
+   !like 'mention discord handle' 'tweet content' -> Request mentioned user to like your tweet which matches the content mentioned
+10. Liked
+    !liked 'mention discord handle' 'tweet content' -> Verify that you have liked the tweet which matches the content of the mentioned user
 
 How To Run The Bot
 
