@@ -1,6 +1,5 @@
 # twit-bot
 
-Our submission for build a bot competetion organised by GDSC IIIT Sri City
 
 To Invite TwitBot - Copy this URL and paste it in browser tab
 https://discord.com/api/oauth2/authorize?client_id=1042529391328104488&permissions=8&scope=bot%20applications.commands
